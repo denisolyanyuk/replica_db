@@ -1,0 +1,2 @@
+https://www.dmosk.ru/miniinstruktions.php?mini=postgresql-replication-docker
+https://programmer.group/docker-configures-the-master-slave-environment-of-postgresql13.html

@@ -1,0 +1,82 @@
+version: '3.9'
+services:
+  master:
+    image: postgres:14.0
+    command:
+      - "postgres"
+      - "-c"
+      - "config_file=/etc/postgresql/postgresql.conf"
+      - "-c"
+      - "hba_file=/etc/postgresql/pg_hba.conf"
+    container_name: master_db
+    volumes:
+        - ./volumes/master:/var/lib/postgresql/data
+        - ./master_conf:/etc/postgresql
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+
+
+  slave_1:
+    image: postgres:14
+    command:
+      - "postgres"
+      - "-c"
+      - "config_file=/etc/postgresql/postgresql.conf"
+      - "-c"
+      - "hba_file=/etc/postgresql/pg_hba.conf"
+    container_name: slave_1
+    volumes:
+      - ./volumes/slave_1:/var/lib/postgresql/data
+      - ./slave_conf:/etc/postgresql
+    ports:
+      - "5433:5433"
+    environment:
+      POSTGRES_USER: ${REPL_USER}
+      POSTGRES_PASSWORD: ${REPL_PASSWORD}
+      PGPORT: 5433
+
+
+  slave_2:
+    image: postgres:14
+    command:
+      - "postgres"
+      - "-c"
+      - "config_file=/etc/postgresql/postgresql.conf"
+      - "-c"
+      - "hba_file=/etc/postgresql/pg_hba.conf"
+    container_name: slave_2
+    volumes:
+      - ./volumes/slave_2:/var/lib/postgresql/data
+      - ./slave_conf:/etc/postgresql
+    ports:
+      - "5434:5434"
+    environment:
+      POSTGRES_USER: ${REPL_USER}
+      POSTGRES_PASSWORD: ${REPL_PASSWORD}
+      PGPORT: 5434
+
+# container to create replication of master_conf:
+# pg_basebackup -R -D /var/lib/postgresql/repl -Fp -Xs -v -P -h master -p 5432 -U repuser
+# after that cope repl to slave_1 and slave_2
+#  repl:
+#    image: postgres:14
+#    command:
+#      - "postgres"
+#      - "-c"
+#      - "config_file=/etc/postgresql/postgresql.conf"
+#      - "-c"
+#      - "hba_file=/etc/postgresql/pg_hba.conf"
+#    container_name: repl
+#    volumes:
+#      - ./volumes/slave:/var/lib/postgresql/data
+#      - ./volumes/repl:/var/lib/postgresql/repl
+#      - ./slave_conf:/etc/postgresql
+#    ports:
+#      - "5440:5440"
+#    environment:
+#      POSTGRES_USER: ${DB_USER}
+#      POSTGRES_PASSWORD: ${DB_PASSWORD}
+#      PGPORT: 5440
